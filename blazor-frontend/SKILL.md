@@ -9,6 +9,10 @@ argument-hint: 'Component, UI state, bUnit test, or rendering scenario'
 ## When to Use
 
 - Building or refactoring Razor components, including forms, buttons, loading states, empty states, and error states.
+- Creating a new component and deciding which folder it belongs in.
+- Adding component-scoped CSS or JavaScript (`.razor.css`, `.razor.js`).
+- Choosing or changing a render mode (`@rendermode`, `[StreamRendering]`).
+- Moving business logic out of a component and into a service.
 - Adding or reviewing bUnit tests for Razor component rendering, interactions, and async UI state changes.
 - Building or refactoring Razor components that render lists, grids, or repeated items.
 - Optimizing rendering performance for components that re-render too often.
@@ -22,6 +26,10 @@ argument-hint: 'Component, UI state, bUnit test, or rendering scenario'
 
 | Situation                                      | Action                                                                                                                                                                        |
 |------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Creating a component, or deciding where it goes | See [component architecture reference](./references/component-architecture.md)                                                                                                |
+| Component holds business logic or has grown large | Extract a service or child component — see [component architecture reference](./references/component-architecture.md)                                                        |
+| Adding component-specific CSS or JS            | Colocate as `.razor.css` / `.razor.js` — see [component architecture reference](./references/component-architecture.md)                                                        |
+| Writing or reviewing a bUnit test              | See [bUnit component tests reference](./references/bunit-component-tests.md)                                                                                                  |
 | List has < ~50 static items                    | Plain `foreach` loop is fine                                                                                                                                                  |
 | List has many items or scrolls                 | Use `Virtualize<TItem>` — see [virtualization reference](./references/rendering-performance.md#virtualization)                                                                |
 | Collection items change, insert, or reorder    | Add `@key` on each item — see [key reference](./references/element-key-relationships.md)                                                                                      |
@@ -34,13 +42,15 @@ argument-hint: 'Component, UI state, bUnit test, or rendering scenario'
 
 1. **Identify the scenario** using the decision guide above.
 2. **Load the relevant reference** for detailed patterns and code examples:
+    - [Component Architecture](./references/component-architecture.md) — where components live, keeping logic out of components, colocated assets, render modes, splitting.
     - [Rendering Performance](./references/rendering-performance.md) — re-render control, virtualization, component weight, parameter design, event handling.
     - [Element & Key Relationships](./references/element-key-relationships.md) — `@key` directive usage, scoping, when to use/avoid, value selection.
-3. **For bUnit tests**, query the Context7 MCP server with library ID `/websites/bunit_dev` (canonical bUnit docs) for current patterns — service registration before render, input/click events, `WaitForAssertion` for async renders, JSInterop setup for components that use JavaScript-backed libraries, wrapping the component-under-test with parent providers via a `.razor` host (the test project must use `Microsoft.NET.Sdk.Razor` to compile `.razor` files), etc.
+    - [bUnit Component Tests](./references/bunit-component-tests.md) — what to assert, what not to test, shared setup.
+3. **For bUnit tests**, follow [bUnit Component Tests](./references/bunit-component-tests.md), and query the Context7 MCP server with library ID `/websites/bunit_dev` (canonical bUnit docs) for current patterns — service registration before render, input/click events, `WaitForAssertion` for async renders, JSInterop setup for components that use JavaScript-backed libraries, wrapping the component-under-test with parent providers via a `.razor` host (the test project must use `Microsoft.NET.Sdk.Razor` to compile `.razor` files), etc.
 4. **For MudBlazor components**, query the Context7 MCP server with library ID `/mudblazor/mudblazor` for current API usage — dialog/menu/popover patterns, `IMudDialogInstance` (note: methods are `Close` / `Cancel`, not `CloseAsync` / `CancelAsync` in 9.x), `MudPopoverProvider` placement (must be inside the interactive render scope, not a static `MainLayout`), `PositionAtCursor` + `OpenMenuAsync` for context menus, etc.
 5. **Apply the pattern** following the code examples in the reference.
-6. **Verify** the change builds and all affected tests pass per the testing-standards skill.
-7. **REQUIRED: Browser test with Playwright.** Start the dev server (use the project's documented dev-server command, e.g. `dotnet run` or a repo script), navigate to the affected page, and confirm the UI change looks and behaves correctly. This step is mandatory for every UI change — CSS, markup, and logic alike — and must be completed before reporting the task as done. Include the local URL the app is served on in your response so the user can open it directly.
+6. **Verify** the change builds and all affected tests pass, following the repository's documented build and test commands. For component test rules, see [bUnit Component Tests](./references/bunit-component-tests.md).
+7. **REQUIRED: Browser test.** Start the dev server using the repository's documented run command (or `dotnet run` if none is documented), navigate to the affected page, and confirm the UI change looks and behaves correctly with the `#browser` tool, or Playwright MCP if `#browser` is unavailable or insufficient. Keep iterating until it works and looks right. This step is mandatory for every UI change — CSS, markup, and logic alike — and must be completed before reporting the task as done. Include the app URL in your response so the user can open it directly.
 
 ## Key Principles
 
@@ -49,22 +59,3 @@ argument-hint: 'Component, UI state, bUnit test, or rendering scenario'
 - **Component granularity is a trade-off.** Each component has ~0.06ms overhead. A few hundred is fine; thousands need inlining or `Virtualize`.
 - **Virtualize only renders what's visible.** Requires a fixed-height scroll container and uniform item sizes.
 - **Don't optimize prematurely.** Most components don't repeat at scale and don't need aggressive optimization. Focus effort on lists, grids, and high-frequency re-render paths.
-
-## bUnit Component Test Philosophy
-
-bUnit renders the full component tree by default, making parent-component tests inherently integration-style. There is no need for a separate unit + integration split.
-
-**Test observable outcomes, not invocations.**
-Prefer asserting that a message appeared, a component rendered or disappeared, or UI state changed over asserting that a method was called. Use `Received()` only when a service call with specific arguments is genuinely the behavior under test—e.g., when the service owns the mutable state and the parent has no other way to observe the result.
-
-**Avoid `DidNotReceive()` assertions.**
-If a visible outcome proves the operation didn't happen (a no-op message is shown, the modal is closed, etc.), assert that outcome instead. A `DidNotReceive()` check is redundant alongside an assertion that already proves the same thing.
-
-**Don't test child component internals from the parent.**
-Each child component has its own tests. The parent's tests should only verify what the *parent* is responsible for: wiring services, showing or hiding sections, passing correct data. Do not assert on CSS state, internal properties, or render logic that belongs entirely to a child component.
-
-**Avoid tests for static, always-rendered informational copy.**
-If text is unconditional and carries no state or behavior, a test usually only proves that a literal string exists in markup. That adds brittleness when wording changes without protecting meaningful behavior. Prefer browser verification for this kind of content, and reserve automated tests for state changes, conditional rendering, user interactions, and data-driven output.
-
-**Keep shared setup minimal.**
-The constructor or class-level setup should only contain what's needed for the component to render without crashing—service registrations, JSInterop stubs, and fixed return values for state the component reads on init. Tests that need specific mock behavior should set it up in the test body. Default NSubstitute return values (null / zero / empty collections) are already implicit; don't repeat them in setup.

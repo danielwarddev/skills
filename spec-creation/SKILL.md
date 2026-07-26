@@ -191,7 +191,7 @@ Include ASCII wireframes **only when helpful** for understanding the UI:
 
 ### 9. Definition of Done
 
-A final checklist that MUST include testing requirements. Reference the coding-standards skill but also include spec-specific items:
+A final checklist that MUST include testing requirements. Reference the project's language/coding standards skill but also include spec-specific items:
 
 ```markdown
 ## Definition of Done
@@ -205,7 +205,7 @@ A final checklist that MUST include testing requirements. Reference the coding-s
 
 ## Related Skills
 
-**IMPORTANT**: Always follow the [Coding Standards](../coding-standards/SKILL.md) skill when implementing specs. Tests MUST be written for all features. For front-end work, also use the [blazor-frontend](../blazor-frontend/SKILL.md) skill.
+**IMPORTANT**: Always follow the project's language/coding standards skill, if it has one, when implementing specs. Tests MUST be written for all features. For front-end work, also use the project's UI framework skill.
 
 ## Example
 

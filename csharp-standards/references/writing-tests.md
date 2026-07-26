@@ -1,0 +1,93 @@
+# Writing Tests
+
+Read this before adding or changing any automated test.
+
+Tests are not an afterthought. Use them early to shape the design, not as paperwork
+filed after the code works.
+
+## Choosing the Test Level
+
+Pick the smallest level that can verify the changed behavior reliably.
+
+| Behavior | Test type |
+|---|---|
+| One unit in isolation — branching, transformation, explicit error handling | Unit test |
+| Several units together, an end-to-end flow, or file input/output | Integration test |
+
+UI and component rendering are covered by the UI framework's own skill.
+
+## What Not to Test
+
+- Pure delegation — a method whose only job is to forward a call.
+- DI registration and service wiring. Do not add tests that only assert a service was
+  registered; rely on build and runtime validation unless the wiring contains real
+  application logic.
+- Default framework behavior the code does not modify.
+- That an uncaught exception bubbles through unchanged.
+
+Never call external services from a test.
+
+## Test Project and Layout
+
+Put the test in the existing test project that corresponds to the source project under
+test, and mirror the source path inside it:
+
+```
+<SourceProject>\Orders\OrderPricingService.cs
+<TestProject>\Orders\OrderPricingServiceTests.cs
+```
+
+## Naming
+
+Name tests `When_<action>_Then_<expected_result>`, with **every word separated by an
+underscore**.
+
+The only exception is a codebase identifier — a method, class, or property name used
+verbatim — which counts as a single unit:
+
+```csharp
+// Good — ComputeHash is a method name, so it stays intact
+When_ComputeHash_Called_Then_Returns_Sha256_Hex_String
+
+// Bad — plain English words merged without a separator
+When_ComputeHash_Called_Then_ReturnsSha256HexString
+```
+
+## Conventions
+
+- xUnit with AwesomeAssertions, NSubstitute, and AutoFixture.
+- Use `Substitute.For<T>()` rather than handwritten fake classes whenever NSubstitute
+  can express the behavior.
+- Arrange / Act / Assert structure, without section comments.
+- Prefer collection expressions in setup and assertions when the target type is clear.
+- Prefer class-level test doubles with the SUT initialized in the constructor when
+  setup is shared. xUnit constructs a new test class instance per test, so this is
+  exactly equivalent to building the SUT at the top of each test body.
+- When asserting several properties of one returned object, prefer a single
+  `BeEquivalentTo(...)` over separate per-property assertions where it keeps the
+  expectation clear.
+- With NSubstitute's sequential `Returns(first, second, ...)`, do not pass a bare `[]`
+  as a later argument — assign it to a typed local first, or NSubstitute reads it as an
+  empty set of additional return values.
+
+## Assert Behavior, Not Interactions
+
+Assert returned values, state changes, and rendered output rather than implementation
+details.
+
+Avoid `Received()` and `DidNotReceive()` unless the interaction itself is the behavior
+under test — for example, when the collaborator owns the mutable state and there is no
+other way to observe the outcome.
+
+Do not widen the visibility of a production member just to test it. Extract a service
+or helper instead.
+
+## Self-Check
+
+- [ ] Is this the smallest test level that verifies the behavior?
+- [ ] Does the test path mirror the source path?
+- [ ] Does every test name separate plain English words with underscores?
+- [ ] Do assertions check behavior rather than collaborator calls?
+- [ ] Any test that only proves delegation, wiring, or framework defaults?
+- [ ] Was production visibility changed just to enable a test?
+- [ ] Build and tests run using the repository's documented commands?
