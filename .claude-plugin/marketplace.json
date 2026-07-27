@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "danielwarddev-skills",
+  "description": ".NET-focused agent skills for C#, Blazor, mutation testing, and spec-driven development.",
+  "owner": {
+    "name": "Daniel Ward",
+    "email": "danielwarddev@gmail.com",
+    "url": "https://github.com/danielwarddev"
+  },
+  "plugins": [
+    {
+      "name": "dotnet-standards",
+      "source": "./plugins/dotnet-standards",
+      "description": "C#, Blazor Server, and Stryker.NET mutation testing standards.",
+      "category": "languages"
+    },
+    {
+      "name": "spec-workflow",
+      "source": "./plugins/spec-workflow",
+      "description": "Create and execute user-story-driven feature specs in small, reviewable slices.",
+      "category": "productivity"
+    }
+  ]
+}

@@ -123,7 +123,7 @@ Guidelines:
 
 - Data models, record types, and entity configuration + their unit tests
 - Service or business-logic class + DI registration + service tests
-- UI component + styles + component tests (for front-end work, see the blazor-frontend skill)
+- UI component + styles + component tests (for front-end work, see the `dotnet-standards:blazor-frontend` skill)
 - Foundational refactors to existing code + updated existing tests
 - Integration tests that exercise multiple units together (when not naturally colocated with a single layer)
 
