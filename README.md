@@ -31,6 +31,26 @@ Relatively, `spec-execution` is not extremely important, but helps to keep the A
 
 ## Install
 
+### GitHub Copilot in VS Code
+
+Add the marketplace in `settings.json`, then browse `@agentPlugins` in the Extensions view:
+
+```json
+"chat.plugins.marketplaces": ["danielwarddev/skills"]
+```
+
+### GitHub Copilot CLI
+
+```shell
+copilot plugin marketplace add danielwarddev/skills
+copilot plugin install dotnet-standards@danielwarddev-skills
+copilot plugin install spec-workflow@danielwarddev-skills
+```
+
+You can do this from the CLI `/plugin marketplace add`
+and `/plugin install`. VS Code also picks up plugins installed this way from
+`~/.copilot/installed-plugins/`, so there's no need to install them twice.
+
 ### Claude Code
 
 ```
@@ -39,18 +59,10 @@ Relatively, `spec-execution` is not extremely important, but helps to keep the A
 /plugin install spec-workflow@danielwarddev-skills
 ```
 
-### VS Code (GitHub Copilot)
+### Recommend plugins in a repo (Claude Code and Copilot in VS Code)
 
-Add the marketplace in `settings.json`, then browse `@agentPlugins` in the Extensions view:
-
-```json
-"chat.plugins.marketplaces": ["danielwarddev/skills"]
-```
-
-### Per-repository
-
-To have a repo recommend these plugins to everyone who opens it, add to its
-`.claude/settings.json` (or `.github/copilot/settings.json`):
+To have a repo recommend these plugins to anyone who opens it, add to its
+`.claude/settings.json` or `.github/copilot/settings.json`:
 
 ```json
 {
@@ -65,6 +77,8 @@ To have a repo recommend these plugins to everyone who opens it, add to its
   }
 }
 ```
+
+This works with Claude Code and GitHub Copilot in VS Code. Copilot CLI can have per-repo plugins (see the [docs here](https://docs.github.com/en/copilot/concepts/agents/about-plugins#where-can-i-get-plugins)), but they do not recommend them to the user.
 
 ### Other - skill-portability-audit
 
