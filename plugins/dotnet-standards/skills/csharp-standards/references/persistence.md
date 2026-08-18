@@ -24,8 +24,10 @@ this is .NET.
 - For simple entity persistence, **one** test that inserts a record and asserts all
   fields are correct is sufficient. Do not multiply tests across individual fields,
   optional fields, or enum values.
-- If database-backed tests are ever added, use the real provider behavior.
-  **Never** use SQLite or `Microsoft.EntityFrameworkCore.InMemory` as a stand-in.
+- Database-backed tests must run against the real database provider, using the
+  repository's existing test fixtures and helpers, so they exercise real provider
+  behavior, constraints, and query translation. **Never** use SQLite or
+  `Microsoft.EntityFrameworkCore.InMemory` as a stand-in.
 
 ## Self-Check
 
@@ -33,3 +35,4 @@ this is .NET.
 - [ ] Is a migration actually needed, or was it generated out of habit?
 - [ ] Does new storage code follow the project's existing persistence pattern?
 - [ ] Is persistence covered by one thorough test rather than many per-field tests?
+- [ ] Do database-backed tests use the repository's real-provider fixtures and helpers?

@@ -53,6 +53,22 @@ wrappers, and HTTP pipeline behavior. When a slice needs several related registr
 follow the existing pattern of a slice-local `ServiceCollectionExtensions` method and
 call it from `Program.cs`.
 
+Use constructor injection for service collaborators. A service must not instantiate
+its own parser, repository, client, or other dependency in a field initializer or
+method body. Make dependencies explicit in the constructor and construct the object
+graph at the composition root, even when the application wires concrete classes
+manually rather than using a DI container.
+
+Do not create a service or mapper merely to move a few field lookups out of its only
+caller. When an input reader already owns the external-data boundary, direct
+construction of its raw POCO belongs there unless mapping has meaningful reusable or
+independently testable behavior. Constructor injection is not a reason to preserve an
+abstraction that has no responsibility of its own.
+
+When validation depends on normalizing or interpreting the input, that preparation is
+part of the validation responsibility. Keep it in the validator and return the validated
+representation instead of making the caller prepare the validator's internal data shape.
+
 Do not write tests that only assert a service was registered — see
 [writing-tests.md](./writing-tests.md).
 
@@ -63,3 +79,5 @@ Do not write tests that only assert a service was registered — see
 - [ ] Does every interface member correspond to a real application use case?
 - [ ] Are there delegating overloads that should collapse into one method?
 - [ ] Are new services registered in `Program.cs` (directly or via a slice extension)?
+- [ ] Are all service collaborators supplied through constructor injection rather than
+      constructed by the consuming service?

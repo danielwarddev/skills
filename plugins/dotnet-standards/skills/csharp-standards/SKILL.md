@@ -1,6 +1,6 @@
 ---
 name: csharp-standards
-description: 'C# and .NET standards. Use when adding a new class, interface, record, or enum; adding a new .cs file; designing a service or its public API; writing or changing any production C# code; adding persistence, entities, or EF migrations; or writing, reviewing, or fixing unit and integration tests. Routes to focused references for each of those tasks. Excludes UI and markup concerns, which belong to the UI framework skill.'
+description: 'C# and .NET standards. Use when adding or editing a class, interface, record, or enum; adding or editing any .cs file; designing a service or its public API; writing or changing any production C# code; writing Godot Node scripts, scene wiring, or input handling; adding persistence, entities, or EF migrations; or writing, reviewing, or fixing unit and integration tests. Routes to focused references for each of those tasks. Excludes UI and markup concerns, which belong to the UI framework skill.'
 argument-hint: 'The C# task you are about to start'
 ---
 
@@ -13,13 +13,15 @@ This file is a router. It contains no rules of its own — find your task below 
 
 | You are about to... | Read |
 |---|---|
-| Create a new class, interface, record, enum, or delegate | [creating-types.md](./references/creating-types.md) |
-| Add a new `.cs` file, or decide where code should live | [creating-types.md](./references/creating-types.md) |
-| Split a file that has grown too large | [creating-types.md](./references/creating-types.md) |
+| Create **or edit** a class, interface, record, enum, or delegate | [creating-and-editing-types.md](./references/creating-and-editing-types.md) |
+| Add a new `.cs` file, edit an existing one, or decide where code should live | [creating-and-editing-types.md](./references/creating-and-editing-types.md) |
+| Split a file that has grown too large | [creating-and-editing-types.md](./references/creating-and-editing-types.md) |
 | Design or change a service's public API, method signatures, or return types | [designing-service-apis.md](./references/designing-service-apis.md) |
 | Register a service, or decide what belongs behind an interface | [designing-service-apis.md](./references/designing-service-apis.md) |
 | Write or edit method bodies — naming, collections, nullability, async | [writing-csharp.md](./references/writing-csharp.md) |
 | Add an entity, key, query, or EF migration | [persistence.md](./references/persistence.md) |
+| Write or change a `Node` script, scene wiring, input handling, or any Godot API usage | [godot-engine-code.md](./references/godot-engine-code.md) |
+| Decide whether logic belongs in the engine-free core or the Godot layer | [godot-engine-code.md](./references/godot-engine-code.md) |
 | Write or review a unit or integration test | [writing-tests.md](./references/writing-tests.md) |
 | Decide whether something needs a test at all | [writing-tests.md](./references/writing-tests.md) |
 

@@ -59,10 +59,20 @@ When_ComputeHash_Called_Then_ReturnsSha256HexString
 - Use `Substitute.For<T>()` rather than handwritten fake classes whenever NSubstitute
   can express the behavior.
 - Arrange / Act / Assert structure, without section comments.
+- Omit the blank lines between Arrange/Act/Assert when each section is only one line
+  (or the test is two lines total, e.g. Act+Assert with no separate Arrange). Add a
+  blank line between sections only once a section grows past one line, so the blank
+  line is doing real work separating multi-line groups.
 - Prefer collection expressions in setup and assertions when the target type is clear.
+- Keep simple test setup inline instead of hiding it behind a helper that only performs
+  trivial construction or forwards arguments. Extract setup only when the helper removes
+  meaningful repetition or makes the test's intent clearer.
 - Prefer class-level test doubles with the SUT initialized in the constructor when
   setup is shared. xUnit constructs a new test class instance per test, so this is
   exactly equivalent to building the SUT at the top of each test body.
+- In database-backed tests built on the repository's test base class, initialize the SUT
+  once in the constructor from the base class's context factory and store it in a
+  `private readonly` field. Do not call a `CreateService()` helper in every test method.
 - When asserting several properties of one returned object, prefer a single
   `BeEquivalentTo(...)` over separate per-property assertions where it keeps the
   expectation clear.
@@ -87,7 +97,10 @@ or helper instead.
 - [ ] Is this the smallest test level that verifies the behavior?
 - [ ] Does the test path mirror the source path?
 - [ ] Does every test name separate plain English words with underscores?
+- [ ] Is simple test setup inline rather than hidden behind trivial helpers?
+- [ ] Are blank lines between Arrange/Act/Assert omitted when each section is one line?
 - [ ] Do assertions check behavior rather than collaborator calls?
 - [ ] Any test that only proves delegation, wiring, or framework defaults?
 - [ ] Was production visibility changed just to enable a test?
+- [ ] Does each database-backed test initialize its SUT once in the constructor?
 - [ ] Build and tests run using the repository's documented commands?

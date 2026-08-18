@@ -1,6 +1,9 @@
 # Writing C#
 
-Read this when writing or editing method bodies.
+Read this when writing or editing method bodies. These rules apply the same way to
+new code and to code you are changing: when you touch a method whose name, collections,
+or nullability break a rule below, bring it in line as part of that change. That is
+in scope, not an unrelated refactor. Leave code you are not otherwise touching alone.
 
 ## Naming
 
@@ -8,6 +11,41 @@ Read this when writing or editing method bodies.
 - `_camelCase` for private fields.
 - Do **not** suffix async methods with `Async` unless a non-async version exists that
   needs to be distinguished from it (**do** use the async modifier in the signature, though).
+- Name methods for the specific domain action they perform. Generic verbs such as
+  `Read`, `Value`, `Parse`, `Get`, `Required`, `Generate`, `Validate`, `Create`,
+  `Process`, or `Handle` are an antipattern when the declaring
+  type and parameters do not make the complete behavior obvious at the call site.
+  Prefer names such as `ReadOrders`, `GetFieldValue`, `ParseRow`,
+  `GetRequiredFieldValue`, `GenerateTheme`, `ValidateTheme`, and `ParseShipDate`.
+
+A method name should let a caller understand its purpose without reading its body. Do
+not rely on a narrowly named class alone to compensate for an ambiguous operation name,
+especially when several similarly named collaborators form a processing pipeline.
+
+Prefer a clearly named private method over a local function when the code represents a
+reusable operation of the class. Local functions should serve genuinely local control
+flow or closure needs, not hide ordinary helper logic inside a larger method.
+
+Do not use a helper to silently replace structurally missing positional input with an
+empty or default value. When the input contract requires that position, access it
+directly and let the boundary fail rather than manufacturing data for later validation.
+
+## External Data Boundaries
+
+Convert positional external data into a named raw model as early as possible. Passing
+an array of CSV fields together with a header or index map beyond the CSV adapter is an
+antipattern: it leaks transport mechanics into parsing and normalization logic.
+
+Use a two-stage boundary when raw values still require validation or normalization:
+
+```csharp
+AmazonOrderCsvRow rawRow = csvMapper.MapRow(fields, rowNumber);
+AmazonOrderItem item = itemTransformer.TransformRow(rawRow);
+```
+
+The raw record should use meaningful property names and retain source metadata needed
+for errors. Downstream services should consume those properties rather than positional
+collections or header-name constants.
 
 ```csharp
 // Good — there is no synchronous counterpart
@@ -55,6 +93,10 @@ that did not ask for them.
 ## Self-Check
 
 - [ ] Any `Async` suffix without a non-async counterpart?
+- [ ] Any generic method name whose domain action is unclear without reading its body?
+- [ ] Did you rename any pre-existing method you touched whose name breaks these rules?
+- [ ] Does positional external data escape its adapter instead of becoming a named raw
+      model at the boundary?
 - [ ] Any `new List<T>()` / `new T[] { ... }` where a collection expression would work?
 - [ ] Any null guards on non-nullable parameters?
 - [ ] Does the build produce zero warnings?

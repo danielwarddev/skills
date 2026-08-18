@@ -80,6 +80,24 @@ To have a repo recommend these plugins to anyone who opens it, add to its
 
 This works with Claude Code and GitHub Copilot in VS Code. Copilot CLI can have per-repo plugins (see the [docs here](https://docs.github.com/en/copilot/concepts/agents/about-plugins#where-can-i-get-plugins)), but they do not recommend them to the user.
 
+### Selective install (subset of references)
+
+If you only want part of a skill's progressive-disclosure references (for example, just
+`writing-tests.md` and `persistence.md` from `csharp-standards`) instead of installing the
+whole thing as a plugin, clone this repo and run the install script. It copies `SKILL.md`
+into a destination directory, dropping any routing line that points only at excluded
+references, and copies only the requested reference files:
+
+```shell
+# Bash (macOS/Linux/WSL/git-bash)
+./scripts/install-skill.sh dotnet-standards/csharp-standards ~/my-project/.claude/skills --refs writing-tests,persistence
+
+# PowerShell
+./scripts/install-skill.ps1 dotnet-standards/csharp-standards ~/my-project/.claude/skills -Refs writing-tests,persistence
+```
+
+Omit `--refs`/`-Refs` to install every reference (equivalent to a full plugin install).
+
 ### Other - skill-portability-audit
 
 There's another skill in this repo, `skill-portability-audit`, which is intentionally not included as a plugin. Its only purpose is to audit skills in this repo to make sure they're generalized (no real project/folder names, general examples instead of
