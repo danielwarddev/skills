@@ -15,6 +15,12 @@ dotnet stryker --version   # if missing:
 dotnet tool install --global dotnet-stryker
 ```
 
+**Require 4.16.0 or newer on .NET 10.** Older versions (4.15 and below) ship a Roslyn that can't
+load `Microsoft.CodeAnalysis.Razor.Compiler` (`ReferencesNewerCompiler`), so Razor-generated types
+like `App` disappear and the mutated assembly fails to compile — the run dies with
+`Internal error due to compile error` before testing anything. `dotnet tool update --global
+dotnet-stryker` fixes it.
+
 ## 2. Confirm the source test suite is green
 
 ```powershell
@@ -28,6 +34,40 @@ A clone of broken tests is useless — fix failures first.
 Almost always none. Grep the test sources for `TestContext`, `Assert.Multiple`,
 `ITestOutputHelper`, `IAsyncLifetime`, or other v3-specific usage. If any exist, port them to the
 v2 equivalent in the clone; otherwise the sources copy verbatim.
+
+**In this repo, two ports are needed** — apply them to the clone only, never to the v3 sources:
+
+1. `TestContext.Current.CancellationToken` is used throughout and doesn't exist in v2. Add
+   `XunitV2TestContextShim.cs` to the clone rather than editing ~90 call sites:
+
+   ```csharp
+   namespace Xunit;
+
+   public static class TestContext
+   {
+       public static TestContextShim Current { get; } = new();
+
+       public sealed class TestContextShim
+       {
+           public CancellationToken CancellationToken => CancellationToken.None;
+       }
+   }
+   ```
+
+2. `ComponentTestContext : BunitContext` fails all 25 bUnit tests under v2 with
+   `'MudBlazor.KeyInterceptorService' type only implements IAsyncDisposable`. xUnit v3 disposes
+   the context asynchronously; v2 calls only `IDisposable.Dispose`. In the clone, add
+   `IAsyncLifetime` so the async path runs first:
+
+   ```csharp
+   public class ComponentTestContext : BunitContext, IAsyncLifetime
+   {
+       Task IAsyncLifetime.InitializeAsync() => Task.CompletedTask;
+
+       async Task IAsyncLifetime.DisposeAsync() => await ((IAsyncDisposable)this).DisposeAsync();
+   ```
+
+`bunit` 2.x is test-framework agnostic, so it needs no package change.
 
 ## 4. Create the clone `<TestProject>.XunitV2` (if it doesn't exist)
 
@@ -64,6 +104,19 @@ dotnet test <TestProject>.XunitV2\<TestProject>.XunitV2.csproj
 The line `A total of 1 test files matched the specified pattern` confirms VSTest (good).
 The test count must match the v3 project.
 
+> Note: in this repo the v3 project also prints `A total of 1 test files matched the specified
+> pattern` (it references `xunit.runner.visualstudio`), so that line does **not** prove you're on
+> the clone. The only reliable check is the Stryker run itself: 0 killed means you're still on v3.
+
+> `dotnet sln <Solution> remove` rewrites `.slnx` and drops existing `DisplayName` attributes.
+> After teardown, check `git diff <Solution>` and `git checkout -- <Solution>` if it changed.
+
+> **The clone directory is gitignored** (`*.XunitV2/` in `.gitignore`), but the clone still has to
+> be listed in `<Solution>` — dropping it makes Stryker fall back to the v3 project and report
+> `Killed: 0`. That means the `<Solution>` edit is **local-only: never commit it**, or the solution
+> will point at a directory nobody else has. Revert it with `git checkout -- <Solution>` at
+> teardown, and keep it out of any commit made while the clone exists.
+
 ## v2 csproj
 
 Copy the v3 `.csproj` and change **only** the xUnit packages — keep `TargetFramework` (`net10.0`),
@@ -91,6 +144,9 @@ Keep `<Using Include="Xunit" />` — the `Xunit` namespace exists in both versio
     "test-projects": [
       "<TestProject>.XunitV2/<TestProject>.XunitV2.csproj"
     ],
+    "mutate": [
+      "!**/Program.cs"
+    ],
     "ignore-methods": [
       "*Exception.ctor"
     ],
@@ -101,6 +157,8 @@ Keep `<Using Include="Xunit" />` — the `Xunit` namespace exists in both versio
 ```
 
 - `project` is the **file name** of the project under test (not a path).
+- `mutate` with a `!` prefix excludes files. `Program.cs` is the Blazor composition root — its
+  mutants are unkillable noise (43 survivors here), so it's excluded.
 - `ignore-methods` skips mutations of a call's **arguments**. The suffix is **`.ctor`**, not
   `.constructor` — the wrong suffix silently does nothing.
 
