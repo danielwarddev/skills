@@ -47,6 +47,9 @@ Every sentence in a portable skill must pass:
    would not exist if this skill's directory were copied on its own?
 4. **Leakage of an unrelated domain's rules** — e.g. UI/framework-specific rules inside
    a supposedly framework-agnostic language skill, or vice versa.
+5. **Reference-to-reference link** — does a file under `references/` link to or direct
+   the reader to another file under `references/`? Reference files must be independent.
+   Only `SKILL.md` may route readers to reference files.
 
 ### Explicit non-violations (must be stated in the prompt, or the agent over-flags)
 
@@ -100,6 +103,11 @@ Apply this acceptance test to EVERY sentence, and report violations:
    concern to another skill (e.g. "X concerns belong to the Y skill") are
    acceptable. Flag any actual <other-domain> rule.
 
+5. REFERENCE-TO-REFERENCE LINKS: Does any file under `references/` link to or direct
+   the reader to another file under `references/`? Reference files must be
+   independent and must not reference each other. Only `SKILL.md` may route readers
+   to reference files. Flag sibling references even when their links resolve.
+
 Also separately note anything that is a genuine JUDGMENT CALL rather than a clear
 violation (e.g. naming specific libraries/packages the project assumes, or a
 convention the skill itself establishes such as specs living in `.specs/`), so the
@@ -111,7 +119,7 @@ files — this is a read-only audit.
 ```
 
 Fill in `<REPO_PATH>`, `<LANGUAGE/FRAMEWORK>`, the directory list, and the domain names
-for the specific audit. Keep the four numbered criteria and the "non-violations" notes
+for the specific audit. Keep the five numbered criteria and the "non-violations" notes
 verbatim — they are what keeps the false-positive rate down.
 
 ## Dispatching the Audit
@@ -147,14 +155,17 @@ For each finding:
    tradeoff is compliance/specificity vs. portability, and reasonable people
    disagree.
 4. After fixes, re-validate cross-references and links mechanically (a short
-   script pass checking every relative markdown link resolves), since moving
-   content around breaks links silently.
+   script pass checking every relative markdown link resolves and that files under
+   `references/` do not link to one another), since moving content around breaks links
+   silently and valid sibling links still violate reference independence.
 
 ## Self-Check
 
-- [ ] Does every reference file in scope pass the four-part acceptance test?
+- [ ] Does every reference file in scope pass the five-part acceptance test?
 - [ ] Were all four non-violation carve-outs applied before accepting a finding as real?
 - [ ] Does every bare pointer to "project docs" degrade gracefully when none exist?
 - [ ] Do all relative cross-references between skill files still resolve?
+- [ ] Are reference files linked only from `SKILL.md`, with no reference file linking
+   to another reference file?
 - [ ] Were judgment calls (assumed libraries, self-defined conventions) surfaced to the
       user instead of decided unilaterally?

@@ -53,9 +53,28 @@ When_ComputeHash_Called_Then_Returns_Sha256_Hex_String
 When_ComputeHash_Called_Then_ReturnsSha256HexString
 ```
 
+## Naming the System Under Test
+
+Never name the system under test `sut`. Name it for what it actually is — the reader
+should not have to look up a declaration to know what is being exercised.
+
+```csharp
+// Good
+var pool = CreatePool(1);
+var validator = new ThemeValidator();
+
+// Bad
+var sut = CreatePool(1);
+```
+
+The same applies to fields holding a class-level system under test. `sut` carries no
+information that the type name does not already carry better.
+
 ## Conventions
 
 - xUnit with AwesomeAssertions, NSubstitute, and AutoFixture.
+- Keep tests deterministic. Substitute integration boundaries such as external
+  services, clocks, random-number generators, and environment-dependent resources.
 - Use `Substitute.For<T>()` rather than handwritten fake classes whenever NSubstitute
   can express the behavior.
 - Arrange / Act / Assert structure, without section comments.
@@ -79,6 +98,9 @@ When_ComputeHash_Called_Then_ReturnsSha256HexString
 - With NSubstitute's sequential `Returns(first, second, ...)`, do not pass a bare `[]`
   as a later argument — assign it to a typed local first, or NSubstitute reads it as an
   empty set of additional return values.
+- Do not test only the happy path. For every new or changed decision point, cover both
+  outcomes when they produce observable, meaningful behavior; include error, empty, or
+  unavailable states where applicable.
 
 ## Assert Behavior, Not Interactions
 
@@ -97,6 +119,8 @@ or helper instead.
 - [ ] Is this the smallest test level that verifies the behavior?
 - [ ] Does the test path mirror the source path?
 - [ ] Does every test name separate plain English words with underscores?
+- [ ] Is the system under test named for its actual type or role rather than `sut`?
+- [ ] Is the test deterministic, with integration boundaries substituted?
 - [ ] Is simple test setup inline rather than hidden behind trivial helpers?
 - [ ] Are blank lines between Arrange/Act/Assert omitted when each section is one line?
 - [ ] Do assertions check behavior rather than collaborator calls?

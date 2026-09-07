@@ -59,6 +59,10 @@ method body. Make dependencies explicit in the constructor and construct the obj
 graph at the composition root, even when the application wires concrete classes
 manually rather than using a DI container.
 
+Prefer explicit dependencies over global mutable state and static service locators. A
+static accessor that reaches for a collaborator hides the dependency from the
+constructor and makes the type untestable in isolation.
+
 Do not create a service or mapper merely to move a few field lookups out of its only
 caller. When an input reader already owns the external-data boundary, direct
 construction of its raw POCO belongs there unless mapping has meaningful reusable or
@@ -81,3 +85,5 @@ Do not write tests that only assert a service was registered — see
 - [ ] Are new services registered in `Program.cs` (directly or via a slice extension)?
 - [ ] Are all service collaborators supplied through constructor injection rather than
       constructed by the consuming service?
+- [ ] Are dependencies explicit rather than hidden behind global state or static
+      service locators?

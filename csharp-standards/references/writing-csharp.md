@@ -85,6 +85,21 @@ Rely on nullable reference types and warnings-as-errors, and let an unexpected n
 fail naturally. Add an explicit check only when null is an intentional, supported case
 with its own behavior.
 
+## Async and I/O
+
+Use asynchronous APIs for I/O operations. Propagate `CancellationToken` where
+cancellation is meaningful, especially for work tied to a request, operation, or
+object lifetime.
+
+## Error Handling
+
+Avoid broad exception catches and silent fallbacks. Do not swallow an exception to
+return a default value or keep running in an unknown state.
+
+Surface failures where they are actionable. Catch narrowly, and only when there is a
+specific recovery; otherwise preserve the exception or log enough detail to diagnose
+the failure.
+
 ## Scope
 
 Keep changes focused. Do not fold unrelated refactors, renames, or cleanups into a task
@@ -99,5 +114,8 @@ that did not ask for them.
       model at the boundary?
 - [ ] Any `new List<T>()` / `new T[] { ... }` where a collection expression would work?
 - [ ] Any null guards on non-nullable parameters?
+- [ ] Do I/O operations use asynchronous APIs and propagate cancellation where it is
+  meaningful?
+- [ ] Any broad `catch` or silent fallback that hides a failure?
 - [ ] Does the build produce zero warnings?
 - [ ] Is every changed line actually required by the task?
