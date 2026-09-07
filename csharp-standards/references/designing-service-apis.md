@@ -73,8 +73,7 @@ When validation depends on normalizing or interpreting the input, that preparati
 part of the validation responsibility. Keep it in the validator and return the validated
 representation instead of making the caller prepare the validator's internal data shape.
 
-Do not write tests that only assert a service was registered — see
-[writing-tests.md](./writing-tests.md).
+Do not write tests that only assert a service was registered.
 
 ## Self-Check
 
