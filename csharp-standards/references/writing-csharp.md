@@ -30,6 +30,25 @@ Do not use a helper to silently replace structurally missing positional input wi
 empty or default value. When the input contract requires that position, access it
 directly and let the boundary fail rather than manufacturing data for later validation.
 
+## Expression Clarity
+
+Do not nest a meaningful method call, `await` expression, or LINQ pipeline inside an
+argument list. Assign each operation to a clearly named local, then pass that local to
+the next operation. This keeps each transformation visible and makes call sites easier
+to read and debug.
+
+```csharp
+// Bad
+var slug = recipeSlugger.CreateUniqueSlug(
+  food.Name,
+  (await GetAllFoods(cancellationToken)).Select(existingFood => existingFood.Slug));
+
+// Good
+var existingFoods = await GetAllFoods(cancellationToken);
+var existingSlugs = existingFoods.Select(food => food.Slug);
+var slug = recipeSlugger.CreateUniqueSlug(food.Name, existingSlugs);
+```
+
 ## External Data Boundaries
 
 Convert positional external data into a named raw model as early as possible. Passing
@@ -110,6 +129,8 @@ that did not ask for them.
 - [ ] Any `Async` suffix without a non-async counterpart?
 - [ ] Any generic method name whose domain action is unclear without reading its body?
 - [ ] Did you rename any pre-existing method you touched whose name breaks these rules?
+- [ ] Are meaningful calls, `await` expressions, and LINQ pipelines assigned to named
+  locals rather than nested inside argument lists?
 - [ ] Does positional external data escape its adapter instead of becoming a named raw
       model at the boundary?
 - [ ] Any `new List<T>()` / `new T[] { ... }` where a collection expression would work?
