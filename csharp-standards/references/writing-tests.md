@@ -127,4 +127,5 @@ or helper instead.
 - [ ] Any test that only proves delegation, wiring, or framework defaults?
 - [ ] Was production visibility changed just to enable a test?
 - [ ] Does each database-backed test initialize its SUT once in the constructor?
+- [ ] Do tests cover both outcomes of each new or changed decision point?
 - [ ] Build and tests run using the repository's documented commands?
